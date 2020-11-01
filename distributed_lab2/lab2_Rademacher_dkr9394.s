@@ -74,24 +74,73 @@ johnloop:
 	BNE johnloop
 	BX LR
 
+@                          R0		 R1
 @ uint32_t countNegative (int16_t x[], uint32_t count);
 countNegative:
+	MOV R3, R0
+	MOV R0, #0
+positions:
+	LDRSH R2, [R3], #2
+	CMP R2, #0
+	ADDLT R0, R0, #1
+	SUB R1, R1, #1
+	CMP R1, #0
+	BNE positions
 	BX LR
 
+@                             R0	    R1
 @ uint32_t countNonNegative (int16_t x[], uint32_t count);
 countNonNegative:
+	MOV R3, R0
+	MOV R0, #0
+snacktime:
+	LDRSH R2, [R3], #2
+	CMP R2, #0
+	ADDGE R0, R0, #1
+	SUB R1, R1, #1
+	CMP R1, #0
+	BNE snacktime
 	BX LR
 
+@                        R0          R1
 @ uint32_t countMatches(char str[], char toMatch);
 countMatches:
+	MOV R3, R0
+	MOV R0, #0
+approach:
+	LDRB R2, [R3], #1
+	CMP R2, R1
+	ADDEQ R0, R0, #1
+	CMP R2, #0
+	BNE approach
 	BX LR
 	
 @ int32_t returnMax(int16_t x[], uint32_t count);
 returnMax:
+	MOV R3, R0
+	MOV R0, #0
+	LDRSH R0, [R3], #2
+cloudy:
+	LDRSH R2, [R3], #2
+	CMP R2, R0
+	MOVGE R0, R2
+	SUB R1, R1, #1
+	CMP R1, #0
+	BNE cloudy
 	BX LR
 
 @ int32_t returnMin(int16_t x[], uint32_t count);
 returnMin:
+	MOV R3, R0
+	MOV R0, #0
+	LDRSH R0, [R3], #2
+chestplate:
+	LDRSH R2, [R3], #2
+	CMP R0, R2
+	MOVGE R0, R2
+	SUB R1, R1, #1
+	CMP R1, #0
+	BNE chestplate
 	BX LR
 
 
