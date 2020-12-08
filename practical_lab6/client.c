@@ -57,7 +57,8 @@ int main(int argc, char* argv[]) {
         input_length = 0;
         printf("message: ");
         fgets(client_message, sizeof(client_message), stdin);
-        while (client_message[input_length] != '\n') input_length++;
+        input_length = strlen(client_message)-1;
+        client_message[input_length] = '\0';
 
         // create packet
         packet_length = input_length + 3;
@@ -76,8 +77,22 @@ int main(int argc, char* argv[]) {
 
         // print packet to client
         printf("outgoing packet: ");
-        for (int i=0; i<packet_length; i++) printf("%hhx ", packet[i]);
+        for (int i=0; i<packet_length; i++) printf("%02hhX ", packet[i]);
         printf("\n");
+
+        // send to server
+        if (send(socket_desc, packet, strlen((char *)packet), 0) < 0) {
+         printf("unable to send message\n");
+         return EXIT_FAILURE;
+        }
+
+        // receive response from server
+        if (recv(socket_desc, server_message, sizeof(server_message), 0) < 0) {
+         printf("error receiving response from server\n");
+         return EXIT_FAILURE;
+        }
+
+        printf("server's response: %s\n", server_message);
 
     }
 

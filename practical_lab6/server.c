@@ -28,7 +28,8 @@ int main(int argc, char* argv[]) {
  // clean buffers
  memset(server_message, '\0', sizeof(server_message));
  memset(client_message, '\0', sizeof(client_message));
- memset(client_packet,  '\0', sizeof(client_packet));
+ memset(client_packet, '\0', sizeof(client_packet));
+ memset(print_buffer, '\0', sizeof(print_buffer));
 
  // create socket
  socket_desc = socket(AF_INET, SOCK_STREAM, 0);
@@ -40,8 +41,8 @@ int main(int argc, char* argv[]) {
 
  // set up port and ip
  server_addr.sin_family = AF_INET;
- server_addr.sin_family = htons(port);
- server_addr.sin_family = inet_addr(argv[1]);
+ server_addr.sin_port = htons(port);
+ server_addr.sin_addr.s_addr = inet_addr(argv[1]);
 
  // bind to port and ip
  if (bind(socket_desc, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
@@ -52,6 +53,7 @@ int main(int argc, char* argv[]) {
 
  // listening loop
  while (1) {
+
   if (listen(socket_desc, 1) < 0) {
    printf("error while listening\n");
    return EXIT_FAILURE;
@@ -78,17 +80,17 @@ int main(int argc, char* argv[]) {
   msg_valid = 0;
   if (client_packet[0] == 0xAA) {
    client_check = 0xAA;
-   msglen = strlen((char *) client_packet);
+   msglen = (int) client_packet[1];
    for (int i=1; i < msglen-1; i++) client_check ^= client_packet[i];
 
    if (client_packet[msglen-1] == client_check) {
-    for (int i=2; i < msglen-2; i++) print_buffer[i-2] = (char) client_packet[i];
+    for (int i=2; i < msglen - 1; i++) print_buffer[i-2] = (char) client_packet[i];
     printf("client message: %s\n", print_buffer);
     strcpy(server_message, "message received");
     msg_valid = 1;
    }
   }
-  if (!msg_valid) strcpy(server_message, "message rejected: invalid packet");
+  if (!msg_valid) strcpy(server_message, "message rejected");
 
   // respond to client
   if (send(client_sock, server_message, strlen(server_message), 0) < 0) printf("error responding to client\n");
